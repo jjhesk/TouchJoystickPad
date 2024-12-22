@@ -1,0 +1,4 @@
+"""
+{"next_step":{"id_step":3034,"id_quest":745,"num_step":31,"portrait":"\/img\/quests\/p\/d08fadc0\/p.png","picture":"\/img\/quests\/745\/31\/1600x900cut\/P50g-z3.jpg","item":null,"cost":{"*":25},"win":"xp:258","animation_data":null,"dialogue":"I\u2019m about to cum!!","animations":[]},"changes":{"energy_quest":0,"energy_quest_recharge_time":44985,"ts_quest":1703611519,"xp":3344906},"redirect_to":null,"adventure_type":"main","should_be_registered":true,"adventure_name":"Main adventure","progress_to":{"release_date":"1900-01-01","id_world":8,"id_adventure":1,"section":"B","ico_x":15,"ico_y":16,"rect":"7,-5,27,42","main_girl":83,"id_troll":7,"name":"Hamelin Town","num_world":8,"ico":"https:\/\/hh2.hh-content.com\/pictures\/worlds\/head8.png"},"objective_points":{"path_event":{"title":"Path of Attraction","name":"Spend energy","points_gained":20}},"success":true}
+
+"""
