@@ -1,0 +1,54 @@
+# build stage
+FROM python:3.11-slim-buster
+# FROM debian:stable-slim as build
+
+# SHELL ["/bin/bash", "-c"]
+
+WORKDIR /root
+
+# A too high maximum number of file descriptors (with the default value
+# inherited from the docker host) can cause issues with some of our tools:
+#  - sanitizers hanging: https://github.com/google/sanitizers/issues/1662
+#  - valgrind crashing: https://stackoverflow.com/a/75293014
+# This is not be a problem on our CI hosts, but developers who run the image
+# on their machines may run into this (e.g., on Arch Linux), so warn them.
+# (Note that .bashrc is only executed in interactive bash shells.)
+RUN echo 'if [[ $(ulimit -n) -gt 200000 ]]; then echo "WARNING: Very high value reported by \"ulimit -n\". Consider passing \"--ulimit nofile=32768\" to \"docker run\"."; fi' >> /root/.bashrc
+
+# Install build dependencies
+RUN apt-get update -y
+RUN apt-get install -y automake build-essential pkg-config libffi-dev libgmp-dev libssl-dev libtinfo-dev libsystemd-dev zlib1g-dev make g++ tmux git jq wget libncursesw5 libtool autoconf liblmdb-dev autogen
+RUN apt-get install -y libsqlite3-dev m4 ca-certificates gcc libc6-dev curl
+RUN apt-get install -y git curl --no-install-recommends
+# Install Secp256k1
+RUN git clone --depth 1 --branch v0.4.1 https://github.com/bitcoin-core/secp256k1
+WORKDIR /root/secp256k1
+RUN ./autogen.sh
+RUN ./configure --enable-module-schnorrsig --enable-module-ecdh --enable-module-recovery --enable-module-extrakeys --enable-module-ellswift
+RUN make && make install
+RUN apt-get clean
+ENV LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
+ENV PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH"
+# this is the one in here
+
+# COPY --from=build /root/secp256k1/libs/libsecp256k1.a /usr/lib/
+# the copy is done now.
+
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install libssl-dev
+RUN apt-get install -y build-essential vim bash-completion \
+    git curl --no-install-recommends \
+    libgmp-dev \
+    ca-certificates
+RUN apt-get clean
+RUN pip install --index-url https://pypi.tuna.tsinghua.edu.cn/simple certifi
+RUN update-ca-certificates
+WORKDIR /home/ordz
+COPY requirements.txt .
+RUN pip install --index-url https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir -r requirements.txt
+COPY . .
+VOLUME /home/ordz
+WORKDIR /home/ordz
+# ENTRYPOINT
+# find the file ordzXAXXXXX.txt as the key file to start or error exit
+CMD ["python", "main_exe.py", "XXXXX", "--data-dir=/app"]
